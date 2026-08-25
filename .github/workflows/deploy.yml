@@ -9,6 +9,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+  # Agendamento automático (Roda toda segunda-feira às 03:00 UTC)
+  schedule:
+    - cron: '0 3 * * 1'
+
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
@@ -37,6 +41,20 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      - name: Install Python dependencies
+        run: pip install openpyxl requests pandas
+
+      - name: Update data (Baixar planilhas do SharePoint)
+        run: |
+          python scripts/python/converter_auto_lai.py
+          python scripts/python/converter_auto_ouvidoria.py
+
       - name: Build
         run: npm run build
       - name: Setup Pages
