@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/*  Cores caixa do inicio */
+:root {
+  --sidebar-cor-principal: #041434;
+  /* Pode clicar na caixinha e mudar! */
+  --sidebar-cor-texto: #ffffff;
+}
+
+@theme {
+  --color-background: oklch(0.98 0.01 250);
+  --color-foreground: oklch(0.15 0.02 260);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.15 0.02 260);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.15 0.02 260);
+  --color-primary: oklch(0.65 0.18 250);
+  --color-primary-foreground: oklch(0.98 0.005 260);
+  --color-secondary: oklch(0.96 0.01 260);
+  --color-secondary-foreground: oklch(0.20 0.03 260);
+  --color-muted: oklch(0.96 0.01 260);
+  --color-muted-foreground: oklch(0.40 0.02 260);
+  --color-accent: oklch(0.96 0.01 260);
+  --color-accent-foreground: oklch(0.20 0.03 260);
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-destructive-foreground: oklch(0.98 0.01 260);
+  --color-border: oklch(0.90 0.01 260);
+  --color-input: oklch(0.90 0.01 260);
+  --color-ring: oklch(0.65 0.18 250);
+  --color-chart-1: oklch(0.65 0.18 250);
+  --color-chart-2: oklch(0.7 0.18 175);
+  --color-chart-3: oklch(0.65 0.18 290);
+  --color-chart-4: oklch(0.7 0.18 155);
+  --color-chart-5: oklch(0.7 0.18 50);
+  --color-sidebar-background: oklch(0.98 0.01 250);
+  --color-sidebar-foreground: oklch(0.3 0.02 260);
+
+  /* Puxando as cores lá do :root para ativar o color picker */
+  --color-sidebar-primary: var(--sidebar-cor-principal);
+  --color-sidebar-primary-foreground: var(--sidebar-cor-texto);
+
+  --color-sidebar-accent: oklch(0.95 0.01 260);
+  --color-sidebar-accent-foreground: oklch(0.15 0.02 260);
+  --color-sidebar-border: oklch(0.90 0.01 260);
+  --color-sidebar-ring: oklch(0.65 0.18 250);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.75 0.01 260);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.6 0.01 260);
+}
+
+/* Smooth animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
