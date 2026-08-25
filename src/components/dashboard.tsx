@@ -10,7 +10,7 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/dados.json")
+    fetch(import.meta.env.BASE_URL + "dados.json")
       .then((res) => {
         if (!res.ok) throw new Error("Falha ao carregar dados.json");
         return res.json();

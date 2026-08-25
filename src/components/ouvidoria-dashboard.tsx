@@ -22,7 +22,7 @@ export function OuvidoriaDashboard({ onDataLoaded }: OuvidoriaDashboardProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/dados_ouvidoria.json")
+    fetch(import.meta.env.BASE_URL + "dados_ouvidoria.json")
       .then((res) => {
         if (!res.ok) throw new Error("Falha ao carregar dados_ouvidoria.json");
         return res.json();

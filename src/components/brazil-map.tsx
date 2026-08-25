@@ -79,7 +79,7 @@ function LeafletBrazilMap({ data, selectedUF, onStateClick }: LeafletMapProps) {
     mapRef.current = map;
 
     // Carrega GeoJSON
-    fetch("/brasil-estados.geojson")
+    fetch(import.meta.env.BASE_URL + "brasil-estados.geojson")
       .then(r => r.json())
       .then(geojson => {
         const layer = L.geoJSON(geojson, {

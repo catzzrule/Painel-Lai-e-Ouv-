@@ -19,10 +19,10 @@ export function LaiDashboard({ onDataLoaded }: LaiDashboardProps) {
 
   useEffect(() => {
     // Tenta carregar dados_lai.json primeiro, com fallback para dados.json
-    fetch("/dados_lai.json")
+    fetch(import.meta.env.BASE_URL + "dados_lai.json")
       .then((res) => {
         if (res.ok) return res.json();
-        return fetch("/dados.json").then((r) => {
+        return fetch(import.meta.env.BASE_URL + "dados.json").then((r) => {
           if (!r.ok) throw new Error("Falha ao carregar dados_lai.json");
           return r.json();
         });
