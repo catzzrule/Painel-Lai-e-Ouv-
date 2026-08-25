@@ -5,6 +5,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/Painel-Lai-e-Ouv-/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
