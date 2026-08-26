@@ -7,6 +7,7 @@ import { DateFilterBar } from "./date-filter-bar";
 import { useDateFilterLai } from "@/lib/use-date-filter";
 import { LaiTable } from "./lai-table";
 import { ChevronDown } from "lucide-react";
+import { LaiGraficoEvolucao } from "./lai-grafico-evolucao";
 
 interface LaiDashboardProps {
   onDataLoaded?: (data: DadosLai) => void;
@@ -88,6 +89,19 @@ function LaiDashboardContent({ dados }: { dados: DadosLai }) {
   } = useDateFilterLai(dados);
 
   const [showLaiTable, setShowLaiTable] = useState(false);
+  const [anoSelecionado, setAnoSelecionado] = useState<string>("2026");
+
+  // Sincroniza o Filtro de Ano com o Filtro de Data (assim todos os gráficos antigos atualizam)
+  useEffect(() => {
+    if (anoSelecionado === "Todos") {
+      clearFilters();
+    } else {
+      setDateRange({
+        from: new Date(`${anoSelecionado}-01-01T00:00:00`),
+        to: new Date(`${anoSelecionado}-12-31T23:59:59`),
+      });
+    }
+  }, [anoSelecionado, setDateRange, clearFilters]);
 
   return (
     <div className="space-y-8 max-w-[1400px] mx-auto animate-fade-in-up">
@@ -96,16 +110,44 @@ function LaiDashboardContent({ dados }: { dados: DadosLai }) {
         <KpiCards kpis={filteredData.kpis} />
       </section>
 
-      {/* Barra de Filtro por Período */}
-      <DateFilterBar
-        dateRange={dateRange}
-        setDateRange={setDateRange}
-        clearFilters={clearFilters}
-        hasActiveFilter={hasActiveFilter}
-        getRecordsForExport={getRecordsForExport}
-        panelName="LAI"
-        accentColor="blue"
-      />
+      {/* Barra de Filtro por Período e Ano */}
+      <div className="flex flex-col md:flex-row gap-4 items-end">
+        <div className="flex-1">
+          <DateFilterBar
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            clearFilters={clearFilters}
+            hasActiveFilter={hasActiveFilter}
+            getRecordsForExport={getRecordsForExport}
+            panelName="LAI"
+            accentColor="blue"
+          />
+        </div>
+        <div className="bg-white p-2 rounded-lg border border-border shadow-sm w-full md:w-auto flex items-center gap-3 h-[72px]">
+          <div className="text-sm font-medium text-slate-700 pl-2">Filtrar Ano:</div>
+          <select 
+            value={anoSelecionado}
+            onChange={(e) => setAnoSelecionado(e.target.value)}
+            className="h-10 px-4 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="Todos">Todos</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Nova Seção: Visão Anual LAI (Gráfico de Evolução) */}
+      <section id="secao-visao-anual" className="space-y-6">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-800">Evolução Histórica e Prorrogações</h2>
+          <div className="h-px bg-slate-200 flex-1 ml-4"></div>
+        </div>
+        {/* Passa TODOS os registros originais para que o gráfico mostre a evolução completa de 2023 a 2026, independente do filtro de período */}
+        <LaiGraficoEvolucao registros={(dados.registros as any) || []} />
+      </section>
 
       {/* Tabela de Protocolos LAI colapsável */}
       <section id="secao-nups" className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
