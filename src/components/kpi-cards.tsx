@@ -65,7 +65,17 @@ const kpiConfig = [
     bgColor: "bg-amber-500/20",
     borderColor: "border-amber-500/20",
     format: (v: number) => v.toLocaleString("pt-BR"),
-    sub: "Cadastradas + Prorrogadas",
+    sub: "Encaminhadas",
+  },
+  {
+    key: "cadastradas" as const,
+    label: "Tratamento",
+    icon: AlertCircle,
+    color: "text-orange-600",
+    bgColor: "bg-orange-500/20",
+    borderColor: "border-orange-500/20",
+    format: (v: number) => (v ?? 0).toLocaleString("pt-BR"),
+    sub: "Situação Cadastrada",
   },
   {
     key: "com_recurso" as const,
@@ -86,10 +96,10 @@ export function KpiCards({ kpis }: KpiCardsProps) {
         <span className="h-1 w-1 rounded-full bg-primary" />
         Indicadores Gerais
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {kpiConfig.map((item, index) => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-4">
+        {kpiConfig.filter(item => kpis[item.key] !== undefined).map((item, index) => {
           const Icon = item.icon;
-          const value = kpis[item.key];
+          const value = kpis[item.key] as number;
           const subText = item.subKey
             ? item.subFormat?.(kpis[item.subKey] as number) ?? ""
             : item.sub ?? "";

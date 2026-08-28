@@ -12,6 +12,10 @@ interface DateFilterBarProps {
   dateRange: DateRange | undefined;
   /** Função para atualizar o range de datas */
   setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+  /** Ano selecionado */
+  selectedYear?: string;
+  /** Função para atualizar o ano selecionado */
+  setSelectedYear?: React.Dispatch<React.SetStateAction<string>>;
   /** Tags disponíveis (Ouvidoria) */
   availableTags?: string[];
   /** Tags selecionadas (Ouvidoria) */
@@ -33,6 +37,8 @@ interface DateFilterBarProps {
 export function DateFilterBar({
   dateRange,
   setDateRange,
+  selectedYear,
+  setSelectedYear,
   availableTags,
   selectedTags,
   toggleTag,
@@ -142,11 +148,32 @@ export function DateFilterBar({
           </div>
         </div>
 
+        {/* Ano Selecionado (LAI) */}
+        {selectedYear !== undefined && setSelectedYear && (
+          <div className="flex flex-col gap-1.5 mt-2">
+            <div className="flex items-center gap-1.5">
+              <CalendarDays className="h-3.5 w-3.5 text-sidebar-foreground/70" />
+              <span className="text-[10px] font-medium text-sidebar-foreground/70 uppercase tracking-wider">Ano:</span>
+            </div>
+            <select
+              className="bg-sidebar-accent border border-sidebar-border rounded-md text-[11px] font-medium text-sidebar-foreground px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500/50 appearance-none w-full shadow-sm cursor-pointer hover:bg-sidebar-accent/80 transition-colors"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              <option value="Todos" className="bg-slate-800 text-slate-100">Todos os Anos</option>
+              <option value="2023" className="bg-slate-800 text-slate-100">2023</option>
+              <option value="2024" className="bg-slate-800 text-slate-100">2024</option>
+              <option value="2025" className="bg-slate-800 text-slate-100">2025</option>
+              <option value="2026" className="bg-slate-800 text-slate-100">2026</option>
+            </select>
+          </div>
+        )}
+
         {/* Calendário */}
         <div className="flex flex-col gap-1.5 mt-2">
           <div className="flex items-center gap-1.5">
             <CalendarDays className="h-3.5 w-3.5 text-sidebar-foreground/70" />
-            <span className="text-[10px] font-medium text-sidebar-foreground/70 uppercase tracking-wider">Período:</span>
+            <span className="text-[10px] font-medium text-sidebar-foreground/70 uppercase tracking-wider">Período Detalhado:</span>
           </div>
           <DatePickerWithRange
             date={dateRange}
@@ -206,6 +233,7 @@ export function DateFilterBar({
               Filtrado:{" "}
               <strong className="text-sidebar-foreground font-semibold">
                 {[
+                  selectedYear && selectedYear !== "Todos" ? `Ano ${selectedYear}` : null,
                   dateRange?.from ? (dateRange.to ? `${dateRange.from.toLocaleDateString("pt-BR")} até ${dateRange.to.toLocaleDateString("pt-BR")}` : dateRange.from.toLocaleDateString("pt-BR")) : null,
                   ...(selectedTags || [])
                 ].filter(Boolean).join(", ")}

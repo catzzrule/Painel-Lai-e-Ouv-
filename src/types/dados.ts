@@ -29,6 +29,7 @@ export interface KPIs {
   media_dias_resposta: number;
   media_dias_prazo_sla: number;
   media_dias_folga: number;
+  cadastradas?: number;
   // Específicos para Ouvidoria
   total_elogios?: number;
   total_reclamacoes?: number;
@@ -74,6 +75,11 @@ export interface DadosLai {
   tipos_pessoa: Record<string, number>;
   estados: Record<string, number>;
   mensal: DadosMensais;
+  historico_anual?: {
+    anos: string[];
+    quantidades: number[];
+    media_dias_resposta: number[];
+  };
   registros?: Record<string, unknown>[];
   principais_areas?: Record<string, Record<string, string>>;
 }
@@ -97,6 +103,11 @@ export interface DadosPainelOuvidoria {
   estados: Record<string, number>;
   principais_areas?: Record<string, Record<string, string>>;
   mensal: DadosMensais;
+  historico_anual?: {
+    anos: string[];
+    quantidades: number[];
+    media_dias_resposta: number[];
+  };
   relatorio_mensal_disponivel?: boolean;
   relatorio_mensal_url?: string;
   registros?: RegistroOuvidoria[];

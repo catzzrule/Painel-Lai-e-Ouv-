@@ -385,7 +385,7 @@ def processar_dados(registros):
 
     em_aberto = 0
     for k in situacoes:
-        if "Cadastrada" in k or "Prorrogada" in k or "Encaminhada" in k:
+        if "Cadastrada" in k or "Encaminhada" in k:
             em_aberto += situacoes[k]
 
     com_recurso = 0

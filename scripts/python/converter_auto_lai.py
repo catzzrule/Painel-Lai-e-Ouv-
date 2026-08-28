@@ -56,7 +56,7 @@ except ImportError:
 # Obter URL do .env ou usar fallback padrão
 SHAREPOINT_LINK = os.environ.get(
     "SHAREPOINT_URL_LAI",
-    "https://mdsgov-my.sharepoint.com/:x:/g/personal/rayssa_vitoria_esporte_gov_br/IQBvZ6Cbt41oRJBD1QuPbvLBAfoOSMBzDpwUbAT797m4ggA?e=FaCchc"
+    "https://mdsgov-my.sharepoint.com/:x:/g/personal/camila_tavares_esporte_gov_br/IQCjskp0evAAS5s1U2hnts5zAcgZcqAlNZPfj_04ZF0fXqM?e=cvckUQ"
 ).strip()
 
 
@@ -214,10 +214,17 @@ def carregar_planilha(caminho):
             else:
                 registro["Status do Prazo"] = "Em atraso" if (val_prazo and datetime.now() > val_prazo) else "Em aberto - no prazo"
 
+        # Adicionar o Ano
+        if val_cadastro:
+            registro["Ano"] = val_cadastro.strftime("%Y")
+        else:
+            registro["Ano"] = str(datetime.now().year)
+            
+
         registros.append(registro)
 
     headers_finais = list(headers)
-    for campo in ["Ano-Mês Cadastro", "Dias para Resposta", "Dias de Prazo (SLA)", "Dias de Folga/Atraso", "Status do Prazo"]:
+    for campo in ["Ano", "Ano-Mês Cadastro", "Dias para Resposta", "Dias de Prazo (SLA)", "Dias de Folga/Atraso", "Status do Prazo"]:
         if campo not in headers_finais:
             headers_finais.append(campo)
 
@@ -327,7 +334,7 @@ def processar_dados(registros):
 
     total = len(registros)
     concluidas = sum(v for k, v in situacoes.items() if "onclu" in k)
-    em_aberto = sum(v for k, v in situacoes.items() if any(t in k for t in ["Cadastrada", "Prorrogada", "Encaminhada", "aberto"]))
+    em_aberto = sum(v for k, v in situacoes.items() if any(t in k for t in ["Encaminhada", "aberto"]))
     com_recurso = sum(v for k, v in recursos.items() if "respondido" in k.lower())
     respondidas_prazo = sum(v for k, v in status_prazo.items() if "respondida" in k.lower() and "prazo" in k.lower())
     no_prazo_total = sum(v for k, v in status_prazo.items() if "prazo" in k.lower())
@@ -336,6 +343,8 @@ def processar_dados(registros):
     media_prazo = round(sum(dias_prazo_total) / len(dias_prazo_total), 1) if dias_prazo_total else 0
     media_folga = round(sum(dias_folga_total) / len(dias_folga_total), 1) if dias_folga_total else 0
 
+    total_respondidas = sum(v for k, v in status_prazo.items() if "respondida" in k.lower())
+
     dados["kpis"] = {
         "total": total,
         "concluidas": concluidas,
@@ -343,7 +352,7 @@ def processar_dados(registros):
         "em_aberto": em_aberto,
         "com_recurso": com_recurso,
         "respondidas_prazo": respondidas_prazo,
-        "taxa_no_prazo": round((respondidas_prazo / concluidas) * 100, 1) if concluidas > 0 else 0,
+        "taxa_no_prazo": round((respondidas_prazo / total_respondidas) * 100, 1) if total_respondidas > 0 else 0,
         "no_prazo_total": no_prazo_total,
         "media_dias_resposta": media_resp,
         "media_dias_prazo_sla": media_prazo,
@@ -427,8 +436,33 @@ def main():
 
     dados = processar_dados(registros)
 
+    anos = sorted(list(set(r.get("Ano") for r in registros if r.get("Ano"))))
+    historico_anual = {
+        "anos": anos,
+        "quantidades": [],
+        "media_dias_resposta": []
+    }
+    
+    for ano in anos:
+        regs_ano = [r for r in registros if r.get("Ano") == ano]
+        historico_anual["quantidades"].append(len(regs_ano))
+        
+        dias_resp_ano = []
+        for r in regs_ano:
+            v = r.get("Dias para Resposta")
+            if v is not None:
+                try:
+                    dias_resp_ano.append(int(float(v)))
+                except ValueError:
+                    pass
+
+        media_ano = round(sum(dias_resp_ano) / len(dias_resp_ano), 1) if dias_resp_ano else 0
+        historico_anual["media_dias_resposta"].append(media_ano)
+    
+    dados["historico_anual"] = historico_anual
+
     # Salvar em dados_lai.json e manter dados.json para retrocompatibilidade
-    public_dir = os.path.join(script_dir, "public")
+    public_dir = os.path.join(os.path.dirname(os.path.dirname(script_dir)), "public")
     os.makedirs(public_dir, exist_ok=True)
 
     saida_lai = os.path.join(public_dir, "dados_lai.json")
