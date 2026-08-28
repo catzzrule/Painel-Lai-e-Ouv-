@@ -4,17 +4,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { Timer, Clock, CalendarCheck, ArrowUpRight } from "lucide-react";
+import { Timer, Clock, CalendarCheck } from "lucide-react";
+import { formatMesLabel } from "@/lib/use-date-filter";
 
 interface SlaSectionProps {
   dados: DadosOuvidoria;
 }
 
-const formatMes = (m: string) => {
-  const nomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-  const [ano, mes] = m.split("-");
-  return nomes[parseInt(mes, 10) - 1] + "/" + ano.slice(2);
-};
 
 export function SlaSection({ dados }: SlaSectionProps) {
   const { kpis } = dados;
@@ -40,7 +36,7 @@ export function SlaSection({ dados }: SlaSectionProps) {
   };
 
   const stackedData = dados.mensal.meses.map((m) => {
-    const entry: Record<string, string | number> = { mes: formatMes(m) };
+    const entry: Record<string, string | number> = { mes: formatMesLabel(m) };
     statusList.forEach((s) => {
       entry[s] = statusPorMes[m]?.[s] ?? 0;
     });

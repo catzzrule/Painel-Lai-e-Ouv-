@@ -9,6 +9,8 @@ export interface DateFilterReturn<T = any> {
   filteredData: T;
   dateRange: DateRange | undefined;
   setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+  selectedYear: string;
+  setSelectedYear: React.Dispatch<React.SetStateAction<string>>;
   availableTags: string[];
   selectedTags: string[];
   toggleTag: (t: string) => void;
@@ -28,6 +30,7 @@ export function formatMesLabel(m: string): string {
 
 export function useDateFilterOuvidoria(dados: DadosPainelOuvidoria): DateFilterReturn<DadosPainelOuvidoria> {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [selectedYear, setSelectedYear] = useState<string>("Todos");
 
   const availableTags = useMemo(() => {
     const tags = new Set<string>();
@@ -47,7 +50,7 @@ export function useDateFilterOuvidoria(dados: DadosPainelOuvidoria): DateFilterR
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const hasActiveFilter = (dateRange?.from !== undefined) || selectedTags.length > 0;
+  const hasActiveFilter = (dateRange?.from !== undefined) || selectedTags.length > 0 || (selectedYear !== "Todos");
 
   const toggleTag = useCallback((tag: string) => {
     setSelectedTags((prev) =>
@@ -58,30 +61,15 @@ export function useDateFilterOuvidoria(dados: DadosPainelOuvidoria): DateFilterR
   const clearFilters = useCallback(() => {
     setDateRange(undefined);
     setSelectedTags([]);
+    setSelectedYear("Todos");
   }, []);
 
   const filteredData = useMemo<DadosPainelOuvidoria>(() => {
     if (!hasActiveFilter) return dados;
 
-    const registros = (dados.registros || []).filter((r) => {
-      let passDate = true;
-      if (dateRange?.from) {
-        const dtAbertura = r.dt_abertura as string | undefined;
-        if (dtAbertura) {
-          const d = new Date(dtAbertura + "T00:00:00");
-          if (dateRange.from && d < dateRange.from) passDate = false;
-          if (dateRange.to && d > dateRange.to) passDate = false;
-        } else {
-          passDate = false;
-        }
-      }
-      const passTag = selectedTags.length > 0 ? selectedTags.some(st => {
-        if (!r.tag) return false;
-        if (Array.isArray(r.tag)) return r.tag.includes(st);
-        return String(r.tag).includes(st);
-      }) : true;
-      return passDate && passTag;
-    });
+    const registros = (dados.registros || []).filter((r) =>
+      matchesOuvidoriaFilters(r, selectedYear, dateRange, selectedTags)
+    );
 
     // Recalcular KPIs
     const total = registros.length;
@@ -179,7 +167,7 @@ export function useDateFilterOuvidoria(dados: DadosPainelOuvidoria): DateFilterR
     generos["Masculino"] = Math.floor(total * 0.46);
     generos["Não informado"] = total - generos["Feminino"] - generos["Masculino"];
 
-    const meses = Array.from(new Set((dados.registros || []).map(r => r.ano_mes))).sort();
+    const meses = Array.from(new Set(registros.map((r: any) => r.ano_mes))).sort();
     const mediaResp = diasRespostaCount > 0 ? Math.round((diasRespostaTotal / diasRespostaCount) * 10) / 10 : dados.kpis.media_dias_resposta;
     const mediaPrazo = diasPrazoCount > 0 ? Math.round((diasPrazoTotal / diasPrazoCount) * 10) / 10 : dados.kpis.media_dias_prazo_sla;
     const mediaFolga = diasFolgaCount > 0 ? Math.round((diasFolgaTotal / diasFolgaCount) * 10) / 10 : dados.kpis.media_dias_folga;
@@ -241,43 +229,31 @@ export function useDateFilterOuvidoria(dados: DadosPainelOuvidoria): DateFilterR
       alertas: dados.alertas,
       registros,
     };
-  }, [dados, dateRange, selectedTags, hasActiveFilter]);
+  }, [dados, dateRange, selectedTags, selectedYear, hasActiveFilter]);
 
   const getRecordsForExport = useCallback(() => {
     const regs = dados.registros || [];
     if (!hasActiveFilter) return regs as Record<string, unknown>[];
-    return regs.filter((r) => {
-      let passDate = true;
-      if (dateRange?.from) {
-        const dtAbertura = r.dt_abertura as string | undefined;
-        if (dtAbertura) {
-          const d = new Date(dtAbertura + "T00:00:00");
-          if (dateRange.from && d < dateRange.from) passDate = false;
-          if (dateRange.to && d > dateRange.to) passDate = false;
-        } else {
-          passDate = false;
-        }
-      }
-      const passTag = selectedTags.length > 0 ? selectedTags.some(st => {
-        if (!r.tag) return false;
-        if (Array.isArray(r.tag)) return r.tag.includes(st);
-        return String(r.tag).includes(st);
-      }) : true;
-      return passDate && passTag;
-    }) as unknown as Record<string, unknown>[];
-  }, [dados, dateRange, selectedTags, hasActiveFilter]);
+    return regs.filter((r) =>
+      matchesOuvidoriaFilters(r, selectedYear, dateRange, selectedTags)
+    ) as unknown as Record<string, unknown>[];
+  }, [dados, dateRange, selectedTags, selectedYear, hasActiveFilter]);
 
-  return { filteredData, dateRange, setDateRange, availableTags, selectedTags, toggleTag, clearFilters, hasActiveFilter, getRecordsForExport };
+  return { filteredData, dateRange, setDateRange, selectedYear, setSelectedYear, availableTags, selectedTags, toggleTag, clearFilters, hasActiveFilter, getRecordsForExport };
 }
 
 // ─── LAI ─────────────────────────────────────────────────
 
 export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [selectedYear, setSelectedYear] = useState<string>("2026");
 
-  const hasActiveFilter = (dateRange?.from !== undefined);
+  const hasActiveFilter = (dateRange?.from !== undefined) || (selectedYear !== "Todos");
 
-  const clearFilters = useCallback(() => setDateRange(undefined), []);
+  const clearFilters = useCallback(() => {
+    setDateRange(undefined);
+    setSelectedYear("Todos");
+  }, []);
 
   // LAI não usa tags, mas precisamos retorná-las para satisfazer a interface
   const availableTags: string[] = [];
@@ -285,7 +261,7 @@ export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
   const toggleTag = useCallback(() => { }, []);
 
   const filteredData = useMemo<DadosLai>(() => {
-    if (!hasActiveFilter || !dados.registros?.length) return dados;
+    if (!dados.registros?.length) return dados;
 
     // A chave de ano-mês vem de "Ano-Mês Cadastro" ou "Data de Cadastro"
     const getAnoMes = (r: Record<string, unknown>): string => {
@@ -297,14 +273,24 @@ export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
     };
 
     const registros = dados.registros.filter((r) => {
+      let passDate = true;
+      let passYear = true;
+      
+      const ano = r["Ano"] as string | undefined;
+      if (selectedYear !== "Todos" && ano !== selectedYear) {
+        passYear = false;
+      }
+
       const dtCadastro = r["Data de Cadastro"] as string | undefined;
       if (dtCadastro && dateRange?.from) {
         const d = new Date(dtCadastro + "T00:00:00");
-        if (dateRange.from && d < dateRange.from) return false;
-        if (dateRange.to && d > dateRange.to) return false;
-        return true;
+        if (dateRange.from && d < dateRange.from) passDate = false;
+        if (dateRange.to && d > dateRange.to) passDate = false;
+      } else if (dateRange?.from) {
+          passDate = false;
       }
-      return false;
+      
+      return passDate && passYear;
     });
 
     const total = registros.length;
@@ -371,7 +357,7 @@ export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
     }
 
     const concluidas = Object.entries(situacoes).filter(([k]) => k.includes("onclu")).reduce((a, [, v]) => a + v, 0);
-    const emAberto = Object.entries(situacoes).filter(([k]) => ["Cadastrada", "Prorrogada", "Encaminhada", "aberto"].some((t) => k.includes(t))).reduce((a, [, v]) => a + v, 0);
+    const emAberto = Object.entries(situacoes).filter(([k]) => ["Encaminhada", "aberto"].some((t) => k.includes(t))).reduce((a, [, v]) => a + v, 0);
     const comRecurso = Object.entries(recursos).filter(([k]) => k.toLowerCase().includes("respondido")).reduce((a, [, v]) => a + v, 0);
     const respondPrazo = Object.entries(statusPrazo).filter(([k]) => k.toLowerCase().includes("respondida") && k.toLowerCase().includes("prazo")).reduce((a, [, v]) => a + v, 0);
 
@@ -379,7 +365,9 @@ export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
     const mediaPrazo = diasPrazoCount > 0 ? Math.round((diasPrazoTotal / diasPrazoCount) * 10) / 10 : 0;
     const mediaFolga = diasFolgaCount > 0 ? Math.round((diasFolgaTotal / diasFolgaCount) * 10) / 10 : 0;
 
-    const meses = Array.from(new Set((dados.registros || []).map(getAnoMes))).sort();
+    const meses = Array.from(new Set(registros.map(getAnoMes))).filter(Boolean).sort();
+
+    const cadastradas = Object.entries(situacoes).filter(([k]) => k.includes("Cadastrada")).reduce((a, [, v]) => a + v, 0);
 
     const kpis: KPIs = {
       total,
@@ -393,6 +381,7 @@ export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
       media_dias_resposta: mediaResp,
       media_dias_prazo_sla: mediaPrazo,
       media_dias_folga: mediaFolga,
+      cadastradas: cadastradas,
     };
 
     const mensal: DadosMensais = {
@@ -420,24 +409,33 @@ export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
       mensal,
       registros,
     };
-  }, [dados, dateRange, hasActiveFilter]);
+  }, [dados, dateRange, selectedYear, hasActiveFilter]);
 
   const getRecordsForExport = useCallback(() => {
     const regs = dados.registros || [];
     if (!hasActiveFilter) return regs;
     return regs.filter((r) => {
+      let passDate = true;
+      let passYear = true;
+      
+      const ano = r["Ano"] as string | undefined;
+      if (selectedYear !== "Todos" && ano !== selectedYear) {
+        passYear = false;
+      }
+
       const dtCadastro = r["Data de Cadastro"] as string | undefined;
       if (dtCadastro && dateRange?.from) {
         const d = new Date(dtCadastro + "T00:00:00");
-        if (dateRange.from && d < dateRange.from) return false;
-        if (dateRange.to && d > dateRange.to) return false;
-        return true;
+        if (dateRange.from && d < dateRange.from) passDate = false;
+        if (dateRange.to && d > dateRange.to) passDate = false;
+      } else if (dateRange?.from) {
+          passDate = false;
       }
-      return false;
+      return passDate && passYear;
     });
-  }, [dados, dateRange, hasActiveFilter]);
+  }, [dados, dateRange, selectedYear, hasActiveFilter]);
 
-  return { filteredData, dateRange, setDateRange, availableTags, selectedTags, toggleTag, clearFilters, hasActiveFilter, getRecordsForExport };
+  return { filteredData, dateRange, setDateRange, selectedYear, setSelectedYear, availableTags, selectedTags, toggleTag, clearFilters, hasActiveFilter, getRecordsForExport };
 }
 
 // ─── Utilitários ─────────────────────────────────────────
@@ -460,4 +458,37 @@ function numVal(r: Record<string, unknown>, key: string): number | null {
     }
   }
   return null;
+}
+
+/** Predicado compartilhado de filtro para registros da Ouvidoria. */
+function matchesOuvidoriaFilters(
+  r: import("@/types/dados").RegistroOuvidoria,
+  selectedYear: string,
+  dateRange: import("react-day-picker").DateRange | undefined,
+  selectedTags: string[]
+): boolean {
+  // Filtro de Ano
+  if (selectedYear !== "Todos") {
+    const ano = r.ano_mes ? r.ano_mes.split("-")[0] : undefined;
+    if (ano !== selectedYear) return false;
+  }
+  // Filtro de Data de Abertura
+  let passDate = true;
+  if (dateRange?.from) {
+    const dtAbertura = r.dt_abertura;
+    if (dtAbertura) {
+      const d = new Date(dtAbertura + "T00:00:00");
+      if (dateRange.from && d < dateRange.from) passDate = false;
+      if (dateRange.to && d > dateRange.to) passDate = false;
+    } else {
+      passDate = false;
+    }
+  }
+  // Filtro de Tag
+  const passTag = selectedTags.length > 0 ? selectedTags.some(st => {
+    if (!r.tag) return false;
+    if (Array.isArray(r.tag)) return (r.tag as string[]).includes(st);
+    return String(r.tag).includes(st);
+  }) : true;
+  return passDate && passTag;
 }

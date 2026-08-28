@@ -9,6 +9,7 @@ import {
   Users, Building,
 } from "lucide-react";
 import { NATUREZA_COLORS, getColor } from "@/lib/chart-colors";
+import { formatMesLabel } from "@/lib/use-date-filter";
 import { useEffect, useRef } from "react";
 import { BrazilMapCard } from "@/components/brazil-map";
 
@@ -60,11 +61,6 @@ const renderCustomPieLabel = (props: any) => {
 };
 
 
-const formatMes = (m: string) => {
-  const nomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-  const [ano, mes] = m.split("-");
-  return nomes[parseInt(mes, 10) - 1] + "/" + ano.slice(2);
-};
 
 const toChartData = (obj: Record<string, number>, topAreas?: Record<string, string>) =>
   Object.entries(obj || {}).map(([name, value]) => ({
@@ -265,10 +261,157 @@ function HorizontalBarChart({
   );
 }
 
+function HistoricoAnualChartOuv({ dados }: { dados: DadosPainelOuvidoria }) {
+  if (!dados.historico_anual) return null;
+
+  const hist = dados.historico_anual;
+  const lastIdx = hist.quantidades.length - 1;
+
+  const maxQtd = Math.max(...hist.quantidades);
+  const minTempo = Math.min(...hist.media_dias_resposta);
+  const maxTempo = Math.max(...hist.media_dias_resposta);
+  const tempoRange = maxTempo - minTempo || 1;
+
+  const chartData = hist.anos.map((ano, i) => {
+    const variacao = i > 0 && hist.quantidades[i - 1] > 0
+      ? (((hist.quantidades[i] - hist.quantidades[i - 1]) / hist.quantidades[i - 1]) * 100)
+      : null;
+    const tempoNorm = hist.quantidades[i] * (0.88 + ((hist.media_dias_resposta[i] - minTempo) / tempoRange) * 0.14);
+    return { ano: String(ano), quantidade: hist.quantidades[i], tempoMedio: hist.media_dias_resposta[i], tempoNorm, variacao };
+  });
+
+  const totalGeral = hist.quantidades.reduce((a, b) => a + b, 0);
+  const melhorTempo = Math.min(...hist.media_dias_resposta);
+  const melhorTempoAno = hist.anos[hist.media_dias_resposta.indexOf(melhorTempo)];
+  const variacaoQtd = lastIdx > 0
+    ? (((hist.quantidades[lastIdx] - hist.quantidades[lastIdx - 1]) / hist.quantidades[lastIdx - 1]) * 100).toFixed(1)
+    : null;
+  const variacaoTempo = lastIdx > 0
+    ? (hist.media_dias_resposta[lastIdx] - hist.media_dias_resposta[lastIdx - 1]).toFixed(1)
+    : null;
+
+  const CustomLabel = (props: any) => {
+    const { x, y, index } = props;
+    const item = chartData[index];
+    if (!item || item.variacao === null) return null;
+    const positive = item.variacao >= 0;
+    return (
+      <text x={x} y={y - 10} textAnchor="middle" fontSize={11} fontWeight={700} fill={positive ? "#15803d" : "#b91c1c"}>
+        {`${positive ? "+" : ""}${item.variacao.toFixed(0)}%`}
+      </text>
+    );
+  };
+
+  const CustomTooltipHist = ({ active, payload, label }: any) => {
+    if (!active || !payload?.length) return null;
+    const tempoPayload = payload.find((p: any) => p.dataKey === "tempoNorm");
+    const qtdPayload = payload.find((p: any) => p.dataKey === "quantidade");
+    return (
+      <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xl text-xs">
+        <p className="font-bold text-slate-800 mb-1.5">{label}</p>
+        {qtdPayload && (
+          <p className="text-slate-600 my-1 flex items-center gap-1.5">
+            <span className="inline-block w-2.5 h-2.5 rounded-sm bg-teal-600" />
+            Qtd. Manifestações: <strong className="text-slate-900">{qtdPayload.value?.toLocaleString("pt-BR")}</strong>
+          </p>
+        )}
+        {tempoPayload && (
+          <p className="text-slate-600 my-1 flex items-center gap-1.5">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-900" />
+            Tempo Médio: <strong className="text-slate-900">{tempoPayload.payload.tempoMedio} dias</strong>
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <Card className="border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 overflow-hidden">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          Evolução Histórica por Ano
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="flex flex-col lg:flex-row">
+          <div className="flex-1 min-w-0 rounded-xl m-4 p-4 overflow-hidden border border-slate-200 shadow-sm"
+            style={{ backgroundColor: "#f8fafc" }}>
+            <ResponsiveContainer width="100%" height={290}>
+              <ComposedChart data={chartData} margin={{ top: 36, right: 20, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradBarOuv" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3ab3a5" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#14b8a6" stopOpacity={0.65} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="ano" tick={{ fill: "#334155", fontSize: 12, fontWeight: 600 }} tickLine={false} axisLine={{ stroke: "#cbd5e1" }} />
+                <YAxis yAxisId="left" axisLine={{ stroke: "#cbd5e1", strokeWidth: 1.5 }} tickLine={{ stroke: "#cbd5e1" }} tick={{ fill: "#475569", fontSize: 11, fontWeight: 500 }} width={48} tickFormatter={(v) => v.toLocaleString("pt-BR")} />
+                <Tooltip content={<CustomTooltipHist />} />
+                <Bar yAxisId="left" dataKey="quantidade" name="Qtd. Manifestações"
+                  fill="url(#gradBarOuv)" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                  <LabelList content={<CustomLabel />} />
+                </Bar>
+                <Line yAxisId="left" type="linear" dataKey="tempoNorm" name="Tempo Médio (dias)"
+                  stroke="#0f172a" strokeWidth={2.5}
+                  dot={{ r: 4, fill: "#0f172a", stroke: "#ffffff", strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: "#0f172a" }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+            <div className="flex gap-6 mt-3 justify-center">
+              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                <span className="inline-block w-3 h-2.5 bg-teal-600 rounded-sm" />
+                Qtd. Manifestações
+              </span>
+              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                <span className="inline-block w-3 h-0.5 bg-slate-900 rounded" />
+                Tempo Médio (dias)
+              </span>
+            </div>
+          </div>
+
+          <div className="lg:w-52 flex flex-col gap-3 justify-center p-4 pl-0">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Destaques</p>
+            <div className="rounded-xl border border-border/50 bg-muted/30 p-3 flex flex-col gap-1">
+              <span className="text-[11px] text-muted-foreground">Total acumulado</span>
+              <span className="text-2xl font-bold text-foreground">{totalGeral.toLocaleString("pt-BR")}</span>
+              <span className="text-[11px] text-muted-foreground">{hist.anos[0]} a {hist.anos[lastIdx]}</span>
+            </div>
+            {variacaoQtd !== null && (
+              <div className="rounded-xl border border-border/50 bg-muted/30 p-3 flex flex-col gap-1">
+                <span className="text-[11px] text-muted-foreground">Variação {hist.anos[lastIdx - 1]}→{hist.anos[lastIdx]}</span>
+                <span className={`text-xl font-bold ${parseFloat(variacaoQtd) >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                  {parseFloat(variacaoQtd) >= 0 ? "▲" : "▼"} {Math.abs(parseFloat(variacaoQtd))}%
+                </span>
+                <span className="text-[11px] text-muted-foreground">em manifestações</span>
+              </div>
+            )}
+            <div className="rounded-xl border border-border/50 bg-muted/30 p-3 flex flex-col gap-1">
+              <span className="text-[11px] text-muted-foreground">Melhor tempo médio</span>
+              <span className="text-xl font-bold text-amber-500">{melhorTempo} dias</span>
+              <span className="text-[11px] text-muted-foreground">em {melhorTempoAno}</span>
+            </div>
+            {variacaoTempo !== null && (
+              <div className="rounded-xl border border-border/50 bg-muted/30 p-3 flex flex-col gap-1">
+                <span className="text-[11px] text-muted-foreground">Tempo {hist.anos[lastIdx]} vs. anterior</span>
+                <span className={`text-xl font-bold ${parseFloat(variacaoTempo) <= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                  {parseFloat(variacaoTempo) <= 0 ? "▼" : "▲"} {Math.abs(parseFloat(variacaoTempo))} dias
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps) {
   if (section === "mensal") {
     const mensalData = dados.mensal.meses.map((m, i) => ({
-      mes: formatMes(m),
+      mes: formatMesLabel(m),
       manifestacoes: dados.mensal.quantidades[i],
       tempoMedio: dados.mensal.media_dias_resposta[i],
     }));
@@ -279,6 +422,7 @@ export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps)
           <span className="h-1 w-1 rounded-full bg-primary" />
           {title}
         </h2>
+        {dados.historico_anual && <HistoricoAnualChartOuv dados={dados} />}
         <Card className="border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -349,7 +493,6 @@ export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps)
           <span className="h-1 w-1 rounded-full bg-primary" />
           {title}
         </h2>
-        {/* Apenas a Natureza — Situação Atual removida (dados incorretos no campo) */}
         <DonutChart
           data={dados.naturezas || dados.subtipos}
           title="Distribuição por Natureza da Manifestação"

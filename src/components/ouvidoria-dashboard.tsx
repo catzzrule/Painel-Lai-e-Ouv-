@@ -11,6 +11,7 @@ import { NupTable } from "./nup-table";
 import {
   ChevronDown,
 } from "lucide-react";
+import { updatePeriodBadge } from "@/lib/utils";
 
 interface OuvidoriaDashboardProps {
   onDataLoaded?: (data: DadosPainelOuvidoria) => void;
@@ -33,17 +34,7 @@ export function OuvidoriaDashboard({ onDataLoaded }: OuvidoriaDashboardProps) {
           onDataLoaded(data);
         }
 
-        // Atualizar badges do topo
-        const meses = data.mensal?.meses || [];
-        if (meses.length > 0) {
-          const fmt = (m: string) => {
-            const nomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-            const [ano, mes] = m.split("-");
-            return nomes[parseInt(mes, 10) - 1] + "/" + ano.slice(2);
-          };
-          const badge = document.getElementById("badge-periodo");
-          if (badge) badge.textContent = `${fmt(meses[0])} — ${fmt(meses[meses.length - 1])}`;
-        }
+        updatePeriodBadge(data.mensal?.meses ?? []);
 
         setLoading(false);
       })
@@ -88,6 +79,8 @@ function OuvidoriaDashboardContent({
     filteredData,
     dateRange,
     setDateRange,
+    selectedYear,
+    setSelectedYear,
     availableTags,
     selectedTags,
     toggleTag,
@@ -109,6 +102,8 @@ function OuvidoriaDashboardContent({
       <DateFilterBar
         dateRange={dateRange}
         setDateRange={setDateRange}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
         availableTags={availableTags}
         selectedTags={selectedTags}
         toggleTag={toggleTag}

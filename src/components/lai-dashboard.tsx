@@ -7,6 +7,7 @@ import { DateFilterBar } from "./date-filter-bar";
 import { useDateFilterLai } from "@/lib/use-date-filter";
 import { LaiTable } from "./lai-table";
 import { ChevronDown } from "lucide-react";
+import { updatePeriodBadge } from "@/lib/utils";
 
 interface LaiDashboardProps {
   onDataLoaded?: (data: DadosLai) => void;
@@ -33,17 +34,7 @@ export function LaiDashboard({ onDataLoaded }: LaiDashboardProps) {
           onDataLoaded(data);
         }
 
-        // Update header badges if elements exist
-        const meses = data.mensal.meses;
-        if (meses.length > 0) {
-          const fmt = (m: string) => {
-            const nomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-            const [ano, mes] = m.split("-");
-            return nomes[parseInt(mes, 10) - 1] + "/" + ano.slice(2);
-          };
-          const badge = document.getElementById("badge-periodo");
-          if (badge) badge.textContent = `${fmt(meses[0])} — ${fmt(meses[meses.length - 1])}`;
-        }
+        updatePeriodBadge(data.mensal.meses);
 
         setLoading(false);
       })
@@ -78,10 +69,12 @@ export function LaiDashboard({ onDataLoaded }: LaiDashboardProps) {
 
 /** Componente interno que usa o hook de filtro (precisa de dados já carregados) */
 function LaiDashboardContent({ dados }: { dados: DadosLai }) {
-    const {
-      filteredData,
-      dateRange,
-      setDateRange,
+  const {
+    filteredData,
+    dateRange,
+    setDateRange,
+    selectedYear,
+    setSelectedYear,
     clearFilters,
     hasActiveFilter,
     getRecordsForExport,
@@ -100,6 +93,8 @@ function LaiDashboardContent({ dados }: { dados: DadosLai }) {
       <DateFilterBar
         dateRange={dateRange}
         setDateRange={setDateRange}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
         clearFilters={clearFilters}
         hasActiveFilter={hasActiveFilter}
         getRecordsForExport={getRecordsForExport}
@@ -143,15 +138,6 @@ function LaiDashboardContent({ dados }: { dados: DadosLai }) {
         />
       </section>
 
-      {/* Formulários e Recursos */}
-      <section id="secao-formulario">
-        <ChartCards
-          section="formulario"
-          title="Tipos de Formulário e Recursos"
-          dados={filteredData}
-        />
-      </section>
-
       {/* Perfil do Solicitante */}
       <section id="secao-perfil">
         <ChartCards
@@ -174,6 +160,4 @@ function LaiDashboardContent({ dados }: { dados: DadosLai }) {
   );
 }
 
-// Exportação legado para manter compatibilidade
-export const Dashboard = LaiDashboard;
 

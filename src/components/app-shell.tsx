@@ -1,14 +1,9 @@
 import { useState } from "react";
 import {
-  LayoutDashboard,
-  BarChart3,
-  PieChart,
-  FileText,
-  Users,
-  Timer,
   Menu,
   X,
   Building2,
+  FileText,
   ShieldAlert,
   MessageSquare,
   Layers,
@@ -25,37 +20,8 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
-const navItemsLai = [
-  { id: "kpis", label: "Indicadores Gerais", icon: LayoutDashboard },
-  { id: "mensal", label: "Evolução Mensal", icon: BarChart3 },
-  { id: "situacao", label: "Situação & Decisões", icon: PieChart },
-  { id: "formulario", label: "Tipos de Formulário", icon: FileText },
-  { id: "perfil", label: "Perfil do Solicitante", icon: Users },
-  { id: "sla", label: "Nível de Serviço e Prazos", icon: Timer },
-];
-
-const navItemsOuvidoria = [
-  { id: "kpis", label: "Indicadores Gerais", icon: LayoutDashboard },
-  { id: "alertas", label: "Alertas & Monitoramento", icon: ShieldAlert, highlight: true },
-  { id: "mensal", label: "Evolução Mensal", icon: BarChart3 },
-  { id: "natureza", label: "Natureza & Situação", icon: MessageSquare },
-  { id: "situacao", label: "Decisões & Prazos", icon: PieChart },
-  { id: "perfil", label: "Perfil do Cidadão", icon: Users },
-  { id: "sla", label: "Nível de Serviço & Performance", icon: Timer },
-];
-
 export function AppShell({ activePanel, setActivePanel, children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const currentNavItems = activePanel === "lai" ? navItemsLai : navItemsOuvidoria;
-
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(`secao-${id}`);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      setSidebarOpen(false);
-    }
-  };
 
   return (
     <div className="flex h-screen overflow-hidden">
