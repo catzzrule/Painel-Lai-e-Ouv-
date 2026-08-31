@@ -133,6 +133,8 @@ def processar_planilha_ouvidoria(caminho):
         header_row_idx = 1
         headers = [str(cell.value).strip().replace("\n", " ") if cell.value is not None else f"Coluna_{i}" for i, cell in enumerate(ws[1])]
 
+    print("HEADERS FOUND:", headers)
+
     def encontrar_coluna(termos):
         for h in headers:
             if any(t.lower() in h.lower() for t in termos):
@@ -173,6 +175,9 @@ def processar_planilha_ouvidoria(caminho):
     mensal_status_prazo = defaultdict(lambda: Counter())
     mensal_situacoes = defaultdict(lambda: Counter())
 
+    anual_qtd = defaultdict(int)
+    anual_dias_resp = defaultdict(list)
+
     registros = []
 
     for row_idx in range(header_row_idx + 1, ws.max_row + 1):
@@ -197,33 +202,27 @@ def processar_planilha_ouvidoria(caminho):
                 extracted_uf = str(val).strip().upper()
                 break
 
-        if is_shifted:
-            sit = str(row_vals[0] or "").strip()
-            nup = str(row_vals[1] or "").strip()
-            tipo = str(row_vals[2] or "").strip()
-            reg_por = str(row_vals[3] or "").strip()
-            sub = str(row_vals[5] or "").strip()
-            tag_val = str(row_vals[6] or "").strip()
-            canal = str(row_vals[7] or "").strip()
-            dt_abertura = d8
-            dt_prazo = d9
+        reg = dict(zip(headers, row_vals[:len(headers)]))
+        sit = str(reg.get(col_situacao) or row_vals[0] or "").strip()
+        nup = str(reg.get(col_nup) or row_vals[1] or "").strip()
+        tipo = str(reg.get(col_tipo) or row_vals[2] or "").strip()
+        reg_por = str(reg.get(col_registrado_por) or row_vals[3] or "").strip()
+        sub = str(reg.get(col_subassunto) or row_vals[5] or "").strip()
+        tag_val = str(reg.get(col_tag) or row_vals[6] or "").strip()
+        canal = str(reg.get(col_canal) or row_vals[7] or "").strip()
+        
+        dt_ab = reg.get(col_abertura)
+        dt_abertura = parse_date(dt_ab) if dt_ab else d8
+        
+        dt_pz = reg.get(col_prazo)
+        dt_prazo = parse_date(dt_pz) if dt_pz else d9
+        
+        uf = str(reg.get(col_uf) or "").strip().upper()
+        if uf not in valid_ufs:
             uf = extracted_uf
-            dt_resposta = d13
-        else:
-            reg = dict(zip(headers, row_vals[:len(headers)]))
-            sit = str(reg.get(col_situacao) or row_vals[0] or "").strip()
-            nup = str(reg.get(col_nup) or row_vals[1] or "").strip()
-            tipo = str(reg.get(col_tipo) or row_vals[2] or "").strip()
-            reg_por = str(reg.get(col_registrado_por) or row_vals[3] or "").strip()
-            sub = str(reg.get(col_subassunto) or row_vals[6] or "").strip()
-            tag_val = str(reg.get(col_tag) or row_vals[7] or "").strip()
-            canal = str(reg.get(col_canal) or row_vals[8] or "").strip()
-            dt_abertura = d9 or parse_date(reg.get(col_abertura))
-            dt_prazo = d10 or parse_date(reg.get(col_prazo))
-            uf = str(reg.get(col_uf) or "").strip().upper()
-            if uf not in valid_ufs:
-                uf = extracted_uf
-            dt_resposta = d13 or parse_date(reg.get(col_resposta))
+            
+        dt_resp = reg.get(col_resposta)
+        dt_resposta = parse_date(dt_resp) if dt_resp else (parse_date(row_vals[16]) if len(row_vals) > 16 else d13)
 
         if not sit and not tipo:
             continue
@@ -292,10 +291,13 @@ def processar_planilha_ouvidoria(caminho):
         # Agregação Mensal
         ano_mes = dt_abertura.strftime("%Y-%m") if dt_abertura else "2026-06"
         mensal_qtd[ano_mes] += 1
+        ano = dt_abertura.strftime("%Y") if dt_abertura else "2026"
+        anual_qtd[ano] += 1
         if dt_resposta and dt_abertura:
             d_resp = (dt_resposta - dt_abertura).days
             if d_resp >= 0:
                 mensal_dias_resp[ano_mes].append(d_resp)
+                anual_dias_resp[ano].append(d_resp)
         if tipo:
             mensal_naturezas[ano_mes][tipo] += 1
         if sit:
@@ -369,6 +371,7 @@ def processar_planilha_ouvidoria(caminho):
         })
 
     meses_ordenados = sorted(mensal_qtd.keys())
+    anos_ordenados = sorted(anual_qtd.keys())
     agora = datetime.now()
 
     return {
@@ -410,6 +413,14 @@ def processar_planilha_ouvidoria(caminho):
             "naturezas": {k: f"{v} manifestações" for k, v in areas_demandadas.most_common(5)},
             "situacoes": {k: f"{v} manifestações" for k, v in areas_demandadas.most_common(4)},
         },
+        "historico_anual": {
+            "anos": anos_ordenados,
+            "quantidades": [anual_qtd[a] for a in anos_ordenados],
+            "media_dias_resposta": [
+                round(sum(anual_dias_resp[a]) / len(anual_dias_resp[a]), 1) if anual_dias_resp[a] else media_resp
+                for a in anos_ordenados
+            ]
+        },
         "mensal": {
             "meses": meses_ordenados,
             "quantidades": [mensal_qtd[m] for m in meses_ordenados],
@@ -446,7 +457,7 @@ def processar_planilha_ouvidoria(caminho):
 
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    public_dir = os.path.join(script_dir, "public")
+    public_dir = os.path.join(script_dir, "..", "..", "public")
     os.makedirs(public_dir, exist_ok=True)
 
     print("[*] [OUVIDORIA] Iniciando processamento do Painel Ouvidoria...")

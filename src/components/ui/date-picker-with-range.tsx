@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Calendar as CalendarIcon } from "lucide-react"
 import type { DateRange } from "react-day-picker"
+import { ptBR } from "date-fns/locale"
 
 import { cn } from "../../lib/utils"
 import { Button } from "./button"
@@ -54,14 +55,26 @@ export function DatePickerWithRange({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 flex flex-col" align="start">
           <Calendar
             mode="range"
             defaultMonth={date?.from}
             selected={date}
             onSelect={setDate}
-            numberOfMonths={2}
+            numberOfMonths={1}
+            locale={ptBR}
           />
+          {date && (
+            <div className="p-2 border-t border-slate-200">
+              <Button
+                variant="ghost"
+                className="w-full h-8 text-xs font-medium text-slate-500 hover:text-slate-900"
+                onClick={() => setDate(undefined)}
+              >
+                Limpar Período
+              </Button>
+            </div>
+          )}
         </PopoverContent>
       </Popover>
     </div>
