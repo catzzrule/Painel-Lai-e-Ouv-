@@ -99,7 +99,7 @@ export function DateFilterBar({
   }[accentColor];
 
   const filterContent = (
-    <div className="bg-transparent border border-sidebar-border/50 rounded-xl p-3 shadow-sm">
+    <div className="bg-white/60 backdrop-blur-xl border border-white/40 rounded-2xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
       <div className="flex flex-col gap-3">
         {/* Header */}
         <div className="flex flex-col gap-2">

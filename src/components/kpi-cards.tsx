@@ -108,12 +108,13 @@ export function KpiCards({ kpis }: KpiCardsProps) {
             <Card
               key={item.key}
               className={cn(
-                "group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5",
+                "group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-b from-white to-slate-50/50 border",
                 item.borderColor,
                 "animate-fade-in-up"
               )}
               style={{ animationDelay: `${index * 60}ms` }}
             >
+              <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-r from-transparent via-current to-transparent", item.color)} />
               <CardContent className="p-4 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-card-foreground/70 truncate pr-2">

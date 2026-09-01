@@ -117,7 +117,7 @@ function DonutChart({ data, title, icon: Icon, topAreas, colors }: { data: Recor
   });
 
   return (
-    <Card className="border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+    <Card className="border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 bg-gradient-to-b from-white to-slate-50/30">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
@@ -438,7 +438,7 @@ function MensalChart({ dados }: { dados: DadosOuvidoria }) {
                 style={{ fill: "#000105ff", fontSize: 11, fontWeight: 700 }}
               />
             </Bar>
-            <Line yAxisId="right" type="monotone" dataKey="tempoMedio" name="Tempo Medio (dias)" stroke="#a7a7a7ff" strokeWidth={3} dot={{ r: 5, fill: "#04224eff", stroke: "#fff", strokeWidth: 2 }} />
+            <Line yAxisId="right" type="linear" dataKey="tempoMedio" name="Tempo Medio (dias)" stroke="#a7a7a7ff" strokeWidth={3} dot={{ r: 5, fill: "#04224eff", stroke: "#fff", strokeWidth: 2 }} />
           </ComposedChart>
         </ResponsiveContainer>
       </CardContent>

@@ -471,7 +471,7 @@ export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps)
                 </Bar>
                 <Line
                   yAxisId="right"
-                  type="monotone"
+                  type="linear"
                   dataKey="tempoMedio"
                   stroke="#a7a7a7ff"
                   strokeWidth={3}
