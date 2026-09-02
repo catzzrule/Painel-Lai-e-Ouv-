@@ -1,16 +1,1 @@
-INSTRUÇÕES DE REVERSÃO DO NOVO VISUAL (RESET)
-=================================================
 
-Se por qualquer motivo você não gostar das melhorias de design (glassmorphism, gradientes, glow, etc.) 
-que apliquei no seu painel, você pode desfazer TODAS as mudanças instantaneamente.
-
-Como eu criei um backup exato usando o Git antes de aplicar os estilos, basta seguir este passo a passo:
-
-1. Abra o terminal (no VSCode ou PowerShell) dentro da pasta do projeto "Painel Ouv".
-2. Certifique-se de que parou o servidor caso ele esteja travando os arquivos (Ctrl+C).
-3. Execute o seguinte comando exato:
-
-git reset --hard HEAD
-
-Pronto! Todos os arquivos de componentes `.tsx` (Date Filter, Gráficos, etc) voltarão 
-exatamente para o formato flat/branco padrão que estava antes.
