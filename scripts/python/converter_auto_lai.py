@@ -402,6 +402,8 @@ def processar_dados(registros):
             chave_lower = str(chave).lower() if chave else ""
             if any(termo in chave_lower for termo in ["usuário", "usuario", "responsável", "responsavel"]):
                 continue
+            if isinstance(valor, datetime):
+                valor = valor.strftime("%Y-%m-%d")
             registro_limpo[chave] = valor
         dados["registros"].append(registro_limpo)
 
