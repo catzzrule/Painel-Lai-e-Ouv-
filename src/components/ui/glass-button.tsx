@@ -8,7 +8,7 @@ const glassButtonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-secondary/60 hover:bg-secondary border-border/40 text-slate-700 hover:text-slate-900",
+        default: "bg-secondary/60 hover:bg-secondary border-border/40 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
         primary: "bg-primary/10 hover:bg-primary/20 border-primary/20 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]",
         blue: "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-500 dark:text-blue-400",
         emerald: "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-600 dark:text-emerald-400",

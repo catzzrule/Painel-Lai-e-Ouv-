@@ -12,6 +12,7 @@ import { NATUREZA_COLORS, getColor } from "@/lib/chart-colors";
 import { formatMesLabel } from "@/lib/use-date-filter";
 import { useEffect, useRef } from "react";
 import { BrazilMapCard } from "@/components/brazil-map";
+import { TempoRespostaChart } from "@/components/tempo-resposta-chart";
 
 interface OuvidoriaChartsProps {
   section: "mensal" | "natureza" | "situacao" | "perfil";
@@ -52,7 +53,7 @@ const renderCustomPieLabel = (props: any) => {
         dominantBaseline="central"
         fontSize={11}
         fontWeight={600}
-        fill="#1e293b"
+        fill="var(--color-foreground)"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
@@ -232,13 +233,13 @@ function HorizontalBarChart({
       <CardContent>
         <ResponsiveContainer width="100%" height={chartHeight}>
           <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 90, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" horizontal={false} />
-            <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+            <XAxis type="number" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} tickLine={false} axisLine={false} />
             <YAxis
               type="category"
               dataKey="name"
               width={130}
-              tick={{ fill: "#334155", fontSize: 11 }}
+              tick={{ fill: "var(--color-foreground)", fontSize: 11 }}
               tickLine={false}
               axisLine={false}
             />
@@ -251,7 +252,7 @@ function HorizontalBarChart({
                   const item = chartData.find(d => d.value === value);
                   return `${value.toLocaleString("pt-BR")}  (${item?.pct ?? "0.0"}%)`;
                 }}
-                style={{ fill: "#334155", fontSize: 11, fontWeight: 600 }}
+                style={{ fill: "var(--color-foreground)", fontSize: 11, fontWeight: 600 }}
               />
             </Bar>
           </BarChart>
@@ -307,18 +308,18 @@ function HistoricoAnualChartOuv({ dados }: { dados: DadosPainelOuvidoria }) {
     const tempoPayload = payload.find((p: any) => p.dataKey === "tempoNorm");
     const qtdPayload = payload.find((p: any) => p.dataKey === "quantidade");
     return (
-      <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xl text-xs">
-        <p className="font-bold text-slate-800 mb-1.5">{label}</p>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 shadow-xl text-xs">
+        <p className="font-bold text-slate-800 dark:text-slate-200 mb-1.5">{label}</p>
         {qtdPayload && (
-          <p className="text-slate-600 my-1 flex items-center gap-1.5">
+          <p className="text-slate-600 dark:text-slate-400 my-1 flex items-center gap-1.5">
             <span className="inline-block w-2.5 h-2.5 rounded-sm bg-teal-600" />
-            Qtd. Manifestações: <strong className="text-slate-900">{qtdPayload.value?.toLocaleString("pt-BR")}</strong>
+            Qtd. Manifestações: <strong className="text-slate-900 dark:text-white">{qtdPayload.value?.toLocaleString("pt-BR")}</strong>
           </p>
         )}
         {tempoPayload && (
-          <p className="text-slate-600 my-1 flex items-center gap-1.5">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-900" />
-            Tempo Médio: <strong className="text-slate-900">{tempoPayload.payload.tempoMedio} dias</strong>
+          <p className="text-slate-600 dark:text-slate-400 my-1 flex items-center gap-1.5">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-900 dark:bg-slate-100" />
+            Tempo Médio: <strong className="text-slate-900 dark:text-white">{tempoPayload.payload.tempoMedio} dias</strong>
           </p>
         )}
       </div>
@@ -335,8 +336,7 @@ function HistoricoAnualChartOuv({ dados }: { dados: DadosPainelOuvidoria }) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="flex flex-col lg:flex-row">
-          <div className="flex-1 min-w-0 rounded-xl m-4 p-4 overflow-hidden border border-slate-200 shadow-sm"
-            style={{ backgroundColor: "#f8fafc" }}>
+          <div className="flex-1 min-w-0 rounded-xl m-4 p-4 overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm bg-[#f8fafc] dark:bg-slate-900/40">
             <ResponsiveContainer width="100%" height={290}>
               <ComposedChart data={chartData} margin={{ top: 36, right: 20, left: 0, bottom: 0 }}>
                 <defs>
@@ -345,28 +345,28 @@ function HistoricoAnualChartOuv({ dados }: { dados: DadosPainelOuvidoria }) {
                     <stop offset="100%" stopColor="#14b8a6" stopOpacity={0.65} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="ano" tick={{ fill: "#334155", fontSize: 12, fontWeight: 600 }} tickLine={false} axisLine={{ stroke: "#cbd5e1" }} />
-                <YAxis yAxisId="left" axisLine={{ stroke: "#cbd5e1", strokeWidth: 1.5 }} tickLine={{ stroke: "#cbd5e1" }} tick={{ fill: "#475569", fontSize: 11, fontWeight: 500 }} width={48} tickFormatter={(v) => v.toLocaleString("pt-BR")} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <XAxis dataKey="ano" tick={{ fill: "var(--color-foreground)", fontSize: 12, fontWeight: 600 }} tickLine={false} axisLine={{ stroke: "var(--color-border)" }} />
+                <YAxis yAxisId="left" axisLine={{ stroke: "var(--color-border)", strokeWidth: 1.5 }} tickLine={{ stroke: "var(--color-border)" }} tick={{ fill: "var(--color-muted-foreground)", fontSize: 11, fontWeight: 500 }} width={48} tickFormatter={(v) => v.toLocaleString("pt-BR")} />
                 <Tooltip content={<CustomTooltipHist />} />
                 <Bar yAxisId="left" dataKey="quantidade" name="Qtd. Manifestações"
                   fill="url(#gradBarOuv)" radius={[6, 6, 0, 0]} maxBarSize={60}>
                   <LabelList content={<CustomLabel />} />
                 </Bar>
                 <Line yAxisId="left" type="linear" dataKey="tempoNorm" name="Tempo Médio (dias)"
-                  stroke="#0f172a" strokeWidth={2.5}
-                  dot={{ r: 4, fill: "#0f172a", stroke: "#ffffff", strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: "#0f172a" }}
+                  stroke="var(--color-foreground)" strokeWidth={2.5}
+                  dot={{ r: 4, fill: "var(--color-foreground)", stroke: "var(--color-card)", strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: "var(--color-foreground)" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
             <div className="flex gap-6 mt-3 justify-center">
-              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
                 <span className="inline-block w-3 h-2.5 bg-teal-600 rounded-sm" />
                 Qtd. Manifestações
               </span>
-              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700">
-                <span className="inline-block w-3 h-0.5 bg-slate-900 rounded" />
+              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <span className="inline-block w-3 h-0.5 bg-slate-900 dark:bg-slate-100 rounded" />
                 Tempo Médio (dias)
               </span>
             </div>
@@ -433,13 +433,13 @@ export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps)
           <CardContent>
             <ResponsiveContainer width="100%" height={340}>
               <ComposedChart data={mensalData} margin={{ top: 24, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                <XAxis dataKey="mes" tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} axisLine={false} />
-                <YAxis yAxisId="left" tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="mes" tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }} tickLine={false} axisLine={false} />
+                <YAxis yAxisId="left" tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }} tickLine={false} axisLine={false} />
                 <YAxis
                   yAxisId="right"
                   orientation="right"
-                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
                   unit="d"
@@ -466,7 +466,7 @@ export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps)
                   <LabelList
                     dataKey="manifestacoes"
                     position="top"
-                    style={{ fill: "#000105ff", fontSize: 11, fontWeight: 700 }}
+                    style={{ fill: "var(--color-foreground)", fontSize: 11, fontWeight: 700 }}
                   />
                 </Bar>
                 <Line
@@ -482,6 +482,7 @@ export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps)
             </ResponsiveContainer>
           </CardContent>
         </Card>
+        <TempoRespostaChart meses={dados.mensal.meses} mediaDias={dados.mensal.media_dias_resposta} />
       </div>
     );
   }

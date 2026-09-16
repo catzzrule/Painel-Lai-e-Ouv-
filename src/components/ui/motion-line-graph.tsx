@@ -100,16 +100,16 @@ export function LineGraph({ data }: { data: LineGraphData[] }) {
               y1={line.y}
               x2={width - paddingX}
               y2={line.y}
-              stroke="rgba(0,0,0,0.06)"
+              stroke="var(--color-border)"
               strokeWidth="1"
               strokeDasharray="5,5"
             />
             {/* Left Y Axis (Quantidade) */}
-            <text x={paddingX - 10} y={line.y + 4} fill="#64748b" fontSize={11} textAnchor="end">
+            <text x={paddingX - 10} y={line.y + 4} fill="var(--color-muted-foreground)" fontSize={11} textAnchor="end">
               {Math.round(line.valQtd)}
             </text>
             {/* Right Y Axis (Tempo Médio) */}
-            <text x={width - paddingX + 10} y={line.y + 4} fill="#64748b" fontSize={11} textAnchor="start">
+            <text x={width - paddingX + 10} y={line.y + 4} fill="var(--color-muted-foreground)" fontSize={11} textAnchor="start">
               {Math.round(line.valTempo)}
             </text>
           </g>
@@ -117,7 +117,7 @@ export function LineGraph({ data }: { data: LineGraphData[] }) {
 
         {/* X-Axis labels */}
         {points.map((p, i) => (
-          <text key={i} x={p.x} y={height - 15} fill="#64748b" fontSize={12} textAnchor="middle">
+          <text key={i} x={p.x} y={height - 15} fill="var(--color-muted-foreground)" fontSize={12} textAnchor="middle">
             {p.ano}
           </text>
         ))}
@@ -211,7 +211,7 @@ export function LineGraph({ data }: { data: LineGraphData[] }) {
       <AnimatePresence>
         {tooltip && (
           <motion.div
-            className="absolute z-50 pointer-events-none bg-white rounded-lg shadow-xl border border-slate-100 p-3 w-48 flex flex-col gap-1"
+            className="absolute z-50 pointer-events-none bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 p-3 w-48 flex flex-col gap-1"
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -221,9 +221,9 @@ export function LineGraph({ data }: { data: LineGraphData[] }) {
               top: '10%',
             }}
           >
-            <div className="text-sm font-semibold text-slate-800 mb-1">{tooltip.ano}</div>
+            <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">{tooltip.ano}</div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500 flex items-center gap-1">
+              <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-[#12a594]"></div>
                 Quantidade
               </span>
@@ -247,8 +247,8 @@ export function LineGraph({ data }: { data: LineGraphData[] }) {
               </MotionConfig>
             )}
 
-            <div className="flex items-center justify-between text-xs mt-1 pt-2 border-t border-slate-100">
-              <span className="text-slate-500 flex items-center gap-1">
+            <div className="flex items-center justify-between text-xs mt-1 pt-2 border-t border-slate-100 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-[#f59e0b]"></div>
                 Tempo Médio
               </span>

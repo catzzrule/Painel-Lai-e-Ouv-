@@ -129,9 +129,9 @@ export function SlaSection({ dados }: SlaSectionProps) {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={stackedData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="mes" tick={{ fill: "#000000ff", fontSize: 11 }} />
-                <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="mes" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} />
+                <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "var(--color-card)",

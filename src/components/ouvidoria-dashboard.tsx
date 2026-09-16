@@ -118,9 +118,9 @@ function OuvidoriaDashboardContent({
       <section id="secao-nups" className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
         <button
           onClick={() => setShowNupsTable(!showNupsTable)}
-          className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
+          className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
         >
-          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             Registro dos NUPs
           </h2>
           <ChevronDown className={`h-5 w-5 text-slate-500 transition-transform ${showNupsTable ? "rotate-180" : ""}`} />

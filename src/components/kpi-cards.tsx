@@ -108,7 +108,7 @@ export function KpiCards({ kpis }: KpiCardsProps) {
             <Card
               key={item.key}
               className={cn(
-                "group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-b from-white to-slate-50/50 border",
+                "group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-900/60 border",
                 item.borderColor,
                 "animate-fade-in-up"
               )}

@@ -14,6 +14,7 @@ import { CHART_COLORS, getColor } from "@/lib/chart-colors";
 import { formatMesLabel } from "@/lib/use-date-filter";
 import { useEffect, useRef } from "react";
 import { BrazilMapCard } from "./brazil-map";
+import { TempoRespostaChart } from "./tempo-resposta-chart";
 
 interface ChartCardsProps {
   section: "mensal" | "situacao" | "formulario" | "perfil";
@@ -96,7 +97,7 @@ const renderCustomPieLabel = (props: any) => {
         dominantBaseline="central"
         fontSize={11}
         fontWeight={600}
-        fill="#1e293b"
+        fill="var(--color-foreground)"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
@@ -117,7 +118,7 @@ function DonutChart({ data, title, icon: Icon, topAreas, colors }: { data: Recor
   });
 
   return (
-    <Card className="border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 bg-gradient-to-b from-white to-slate-50/30">
+    <Card className="border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 bg-gradient-to-b from-white to-slate-50/30 dark:from-slate-900 dark:to-slate-900/60">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
@@ -210,9 +211,9 @@ function HorizontalBarChart({ data, title, icon: Icon, color, topAreas }: { data
       <CardContent>
         <ResponsiveContainer width="100%" height={chartHeight}>
           <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 90, top: 4, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" horizontal={false} />
-            <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} axisLine={false} />
-            <YAxis type="category" dataKey="name" tick={{ fill: "#334155", fontSize: 11 }} width={140} tickLine={false} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+            <XAxis type="number" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} tickLine={false} axisLine={false} />
+            <YAxis type="category" dataKey="name" tick={{ fill: "var(--color-foreground)", fontSize: 11 }} width={140} tickLine={false} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="value" fill={barColor} radius={[0, 4, 4, 0]} maxBarSize={22}>
               <LabelList
@@ -222,7 +223,7 @@ function HorizontalBarChart({ data, title, icon: Icon, color, topAreas }: { data
                   const item = chartData.find(d => d.value === value);
                   return `${value.toLocaleString("pt-BR")}  (${item?.pct ?? "0.0"}%)`;
                 }}
-                style={{ fill: "#334155", fontSize: 11, fontWeight: 600 }}
+                style={{ fill: "var(--color-foreground)", fontSize: 11, fontWeight: 600 }}
               />
             </Bar>
           </BarChart>
@@ -244,6 +245,7 @@ export function ChartCards({ section, title, dados }: ChartCardsProps) {
         <div className="space-y-4">
           {dados.historico_anual && <HistoricoAnualChart dados={dados} />}
           <MensalChart dados={dados} />
+          <TempoRespostaChart meses={dados.mensal.meses} mediaDias={dados.mensal.media_dias_resposta} />
         </div>
       )}
       {section === "situacao" && <SituacaoCharts dados={dados} />}
@@ -300,18 +302,18 @@ function HistoricoAnualChart({ dados }: { dados: DadosOuvidoria }) {
     const tempoPayload = payload.find((p: any) => p.dataKey === "tempoNorm");
     const qtdPayload = payload.find((p: any) => p.dataKey === "quantidade");
     return (
-      <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xl text-xs">
-        <p className="font-bold text-slate-800 mb-1.5">{label}</p>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 shadow-xl text-xs">
+        <p className="font-bold text-slate-800 dark:text-slate-200 mb-1.5">{label}</p>
         {qtdPayload && (
-          <p className="text-slate-600 my-1 flex items-center gap-1.5">
+          <p className="text-slate-600 dark:text-slate-400 my-1 flex items-center gap-1.5">
             <span className="inline-block w-2.5 h-2.5 rounded-sm bg-teal-600" />
-            Qtd. Demandas: <strong className="text-slate-900">{qtdPayload.value?.toLocaleString("pt-BR")}</strong>
+            Qtd. Demandas: <strong className="text-slate-900 dark:text-white">{qtdPayload.value?.toLocaleString("pt-BR")}</strong>
           </p>
         )}
         {tempoPayload && (
-          <p className="text-slate-600 my-1 flex items-center gap-1.5">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-900" />
-            Tempo Médio: <strong className="text-slate-900">{tempoPayload.payload.tempoMedio} dias</strong>
+          <p className="text-slate-600 dark:text-slate-400 my-1 flex items-center gap-1.5">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-900 dark:bg-slate-100" />
+            Tempo Médio: <strong className="text-slate-900 dark:text-white">{tempoPayload.payload.tempoMedio} dias</strong>
           </p>
         )}
       </div>
@@ -328,8 +330,7 @@ function HistoricoAnualChart({ dados }: { dados: DadosOuvidoria }) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="flex flex-col lg:flex-row">
-          <div className="flex-1 min-w-0 rounded-xl m-4 p-4 overflow-hidden border border-slate-200 shadow-sm"
-            style={{ backgroundColor: "#f8fafc" }}>
+          <div className="flex-1 min-w-0 rounded-xl m-4 p-4 overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm bg-[#f8fafc] dark:bg-slate-900/40">
             <ResponsiveContainer width="100%" height={290}>
               <ComposedChart data={chartData} margin={{ top: 36, right: 20, left: 0, bottom: 0 }}>
                 <defs>
@@ -338,28 +339,28 @@ function HistoricoAnualChart({ dados }: { dados: DadosOuvidoria }) {
                     <stop offset="100%" stopColor="#14b8a6" stopOpacity={0.65} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="ano" tick={{ fill: "#334155", fontSize: 12, fontWeight: 600 }} tickLine={false} axisLine={{ stroke: "#cbd5e1" }} />
-                <YAxis yAxisId="left" axisLine={{ stroke: "#cbd5e1", strokeWidth: 1.5 }} tickLine={{ stroke: "#cbd5e1" }} tick={{ fill: "#475569", fontSize: 11, fontWeight: 500 }} width={48} tickFormatter={(v) => v.toLocaleString("pt-BR")} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <XAxis dataKey="ano" tick={{ fill: "var(--color-foreground)", fontSize: 12, fontWeight: 600 }} tickLine={false} axisLine={{ stroke: "var(--color-border)" }} />
+                <YAxis yAxisId="left" axisLine={{ stroke: "var(--color-border)", strokeWidth: 1.5 }} tickLine={{ stroke: "var(--color-border)" }} tick={{ fill: "var(--color-muted-foreground)", fontSize: 11, fontWeight: 500 }} width={48} tickFormatter={(v) => v.toLocaleString("pt-BR")} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar yAxisId="left" dataKey="quantidade" name="Qtd. Demandas"
                   fill="url(#gradBar)" radius={[6, 6, 0, 0]} maxBarSize={60}>
                   <LabelList content={<CustomLabel />} />
                 </Bar>
                 <Line yAxisId="left" type="linear" dataKey="tempoNorm" name="Tempo Médio (dias)"
-                  stroke="#0f172a" strokeWidth={2.5}
-                  dot={{ r: 4, fill: "#0f172a", stroke: "#ffffff", strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: "#0f172a" }}
+                  stroke="var(--color-foreground)" strokeWidth={2.5}
+                  dot={{ r: 4, fill: "var(--color-foreground)", stroke: "var(--color-card)", strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: "var(--color-foreground)" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
             <div className="flex gap-6 mt-3 justify-center">
-              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
                 <span className="inline-block w-3 h-2.5 bg-teal-600 rounded-sm" />
                 Qtd. Demandas
               </span>
-              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700">
-                <span className="inline-block w-3 h-0.5 bg-slate-900 rounded" />
+              <span className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <span className="inline-block w-3 h-0.5 bg-slate-900 dark:bg-slate-100 rounded" />
                 Tempo Médio (dias)
               </span>
             </div>
@@ -419,10 +420,10 @@ function MensalChart({ dados }: { dados: DadosOuvidoria }) {
       <CardContent>
         <ResponsiveContainer width="100%" height={340}>
           <ComposedChart data={chartData} margin={{ top: 24, right: 30, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-            <XAxis dataKey="mes" tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} axisLine={false} />
-            <YAxis yAxisId="left" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} axisLine={false} />
-            <YAxis yAxisId="right" orientation="right" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+            <XAxis dataKey="mes" tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }} tickLine={false} axisLine={false} />
+            <YAxis yAxisId="left" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} tickLine={false} axisLine={false} />
+            <YAxis yAxisId="right" orientation="right" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} tickLine={false} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Legend
               iconType="circle"
@@ -435,7 +436,7 @@ function MensalChart({ dados }: { dados: DadosOuvidoria }) {
               <LabelList
                 dataKey="quantidade"
                 position="top"
-                style={{ fill: "#000105ff", fontSize: 11, fontWeight: 700 }}
+                style={{ fill: "var(--color-foreground)", fontSize: 11, fontWeight: 700 }}
               />
             </Bar>
             <Line yAxisId="right" type="linear" dataKey="tempoMedio" name="Tempo Medio (dias)" stroke="#a7a7a7ff" strokeWidth={3} dot={{ r: 5, fill: "#04224eff", stroke: "#fff", strokeWidth: 2 }} />

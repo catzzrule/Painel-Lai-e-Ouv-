@@ -99,12 +99,12 @@ export function DateFilterBar({
   }[accentColor];
 
   const filterContent = (
-    <div className="bg-white/60 backdrop-blur-xl border border-white/40 rounded-2xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
+    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-2xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
       <div className="flex flex-col gap-3">
         {/* Header */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <div className={cn("p-1.5 rounded-lg backdrop-blur-md shadow-inner border border-slate-300", accentColor === "blue" ? "bg-[#00008B]/20" : "bg-[#008028]/20")}>
+            <div className={cn("p-1.5 rounded-lg backdrop-blur-md shadow-inner border border-slate-300 dark:border-white/10", accentColor === "blue" ? "bg-[#00008B]/20" : "bg-[#008028]/20")}>
               <Filter className={cn("h-3.5 w-3.5", accentColor === "blue" ? "text-sidebar-foreground" : "text-emerald-400")} />
             </div>
             <span className="text-xs font-semibold text-sidebar-foreground tracking-wider">

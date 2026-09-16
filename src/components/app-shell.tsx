@@ -9,8 +9,11 @@ import {
   Layers,
   TrendingUp,
   Calendar,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/lib/use-theme";
 
 export type PanelType = "lai" | "ouvidoria";
 
@@ -22,6 +25,7 @@ interface AppShellProps {
 
 export function AppShell({ activePanel, setActivePanel, children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -143,9 +147,9 @@ export function AppShell({ activePanel, setActivePanel, children }: AppShellProp
                 </div>
               </div>
 
-              <div className="ml-auto hidden md:flex items-center gap-3">
+              <div className="ml-auto flex items-center gap-3">
                 {/* Alternador Rápido no Header */}
-                <div className="flex items-center bg-black/20 rounded-lg p-1 border border-white/10">
+                <div className="hidden md:flex items-center bg-black/20 rounded-lg p-1 border border-white/10">
                   <button
                     onClick={() => setActivePanel("lai")}
                     className={cn(
@@ -169,6 +173,16 @@ export function AppShell({ activePanel, setActivePanel, children }: AppShellProp
                     Ouvidoria
                   </button>
                 </div>
+
+                {/* Alternador de Tema Claro/Escuro */}
+                <button
+                  onClick={toggleTheme}
+                  title={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
+                  aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
+                  className="p-2 rounded-lg border border-white/10 bg-black/20 hover:bg-white/10 transition-colors cursor-pointer text-white/80 hover:text-white"
+                >
+                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
               </div>
             </div>
           </header>

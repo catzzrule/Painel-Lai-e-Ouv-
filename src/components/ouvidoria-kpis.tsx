@@ -78,7 +78,7 @@ export function OuvidoriaKpis({ kpis }: OuvidoriaKpisProps) {
         return (
           <Card
             key={i}
-            className={`group relative overflow-hidden border ${card.borderColor} bg-gradient-to-b from-white to-slate-50/50 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300`}
+            className={`group relative overflow-hidden border ${card.borderColor} bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-900/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300`}
           >
             <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-r from-transparent via-current to-transparent ${card.color}`} />
             <CardContent className="p-4 space-y-1.5">
