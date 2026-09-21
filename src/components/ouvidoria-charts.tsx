@@ -2,17 +2,18 @@ import type { DadosPainelOuvidoria } from "@/types/dados";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, Line, ComposedChart, LabelList,
+  PieChart, Pie, Cell, Line, ComposedChart, LabelList,
 } from "recharts";
 import {
   TrendingUp, BarChart3, FileText, MessageSquare,
   Users, Building,
 } from "lucide-react";
 import { NATUREZA_COLORS, getColor } from "@/lib/chart-colors";
-import { formatMesLabel } from "@/lib/use-date-filter";
 import { useEffect, useRef } from "react";
 import { BrazilMapCard } from "@/components/brazil-map";
 import { TempoRespostaChart } from "@/components/tempo-resposta-chart";
+import { EvolucaoMensalChart } from "@/components/evolucao-mensal-chart";
+import { TopResponsaveisTable } from "@/components/top-responsaveis-table";
 
 interface OuvidoriaChartsProps {
   section: "mensal" | "natureza" | "situacao" | "perfil";
@@ -355,8 +356,8 @@ function HistoricoAnualChartOuv({ dados }: { dados: DadosPainelOuvidoria }) {
                 </Bar>
                 <Line yAxisId="left" type="linear" dataKey="tempoNorm" name="Tempo Médio (dias)"
                   stroke="var(--color-foreground)" strokeWidth={2.5}
-                  dot={{ r: 4, fill: "var(--color-foreground)", stroke: "var(--color-card)", strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: "var(--color-foreground)" }}
+                  dot={{ r: 8, fill: "var(--color-foreground)", stroke: "var(--color-card)", strokeWidth: 2 }}
+                  activeDot={{ r: 10, fill: "var(--color-foreground)" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -410,12 +411,6 @@ function HistoricoAnualChartOuv({ dados }: { dados: DadosPainelOuvidoria }) {
 
 export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps) {
   if (section === "mensal") {
-    const mensalData = dados.mensal.meses.map((m, i) => ({
-      mes: formatMesLabel(m),
-      manifestacoes: dados.mensal.quantidades[i],
-      tempoMedio: dados.mensal.media_dias_resposta[i],
-    }));
-
     return (
       <div className="space-y-4">
         <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
@@ -423,65 +418,11 @@ export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps)
           {title}
         </h2>
         {dados.historico_anual && <HistoricoAnualChartOuv dados={dados} />}
-        <Card className="border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              Manifestacoes por Mês - Tempo Medio de Resposta (Dias)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={340}>
-              <ComposedChart data={mensalData} margin={{ top: 24, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="mes" tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }} tickLine={false} axisLine={false} />
-                <YAxis yAxisId="left" tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }} tickLine={false} axisLine={false} />
-                <YAxis
-                  yAxisId="right"
-                  orientation="right"
-                  tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
-                  tickLine={false}
-                  axisLine={false}
-                  unit="d"
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend
-                  verticalAlign="bottom"
-                  height={24}
-                  formatter={(value: string) => (
-                    <span className="text-xs text-card-foreground/80">
-                      {value === "manifestacoes" ? "Total de Manifestacoes" : "Tempo Medio (Dias)"}
-                    </span>
-                  )}
-                />
-                <Bar
-                  yAxisId="left"
-                  dataKey="manifestacoes"
-                  fill="#3ab3a5fa"
-                  radius={[4, 4, 0, 0]}
-                  name="manifestacoes"
-                  maxBarSize={50}
-                  opacity={0.9}
-                >
-                  <LabelList
-                    dataKey="manifestacoes"
-                    position="top"
-                    style={{ fill: "var(--color-foreground)", fontSize: 11, fontWeight: 700 }}
-                  />
-                </Bar>
-                <Line
-                  yAxisId="right"
-                  type="linear"
-                  dataKey="tempoMedio"
-                  stroke="#a7a7a7ff"
-                  strokeWidth={3}
-                  dot={{ fill: "#04224eff", r: 5, stroke: "#fff", strokeWidth: 2 }}
-                  name="tempoMedio"
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <EvolucaoMensalChart
+          meses={dados.mensal.meses}
+          quantidades={dados.mensal.quantidades}
+          title="Evolução Mensal das Manifestações"
+        />
         <TempoRespostaChart meses={dados.mensal.meses} mediaDias={dados.mensal.media_dias_resposta} />
       </div>
     );
@@ -527,6 +468,7 @@ export function OuvidoriaCharts({ section, title, dados }: OuvidoriaChartsProps)
             color="#10b981"
           />
         </div>
+        <TopResponsaveisTable dados={dados.top_responsaveis || []} />
       </div>
     );
   }

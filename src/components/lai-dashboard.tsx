@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { DadosLai } from "@/types/dados";
 import { KpiCards } from "./kpi-cards";
 import { ChartCards } from "./chart-cards";
-import { SlaSection } from "./sla-section";
 import { DateFilterBar } from "./date-filter-bar";
 import { useDateFilterLai } from "@/lib/use-date-filter";
 import { LaiTable } from "./lai-table";
@@ -145,11 +144,6 @@ function LaiDashboardContent({ dados }: { dados: DadosLai }) {
           title="Perfil do Solicitante"
           dados={filteredData}
         />
-      </section>
-
-      {/* SLA */}
-      <section id="secao-sla">
-        <SlaSection dados={filteredData} />
       </section>
 
       {/* Footer */}

@@ -36,6 +36,14 @@ export interface KPIs {
   total_denuncias?: number;
 }
 
+/** Estatísticas agregadas por área/responsável, usadas na tabela "Top Responsáveis" */
+export interface ResponsavelStats {
+  nome: string;
+  total: number;
+  taxaConclusao: number;
+  diasMedio: number;
+}
+
 export interface DadosMensais {
   meses: string[];
   quantidades: number[];
@@ -82,6 +90,7 @@ export interface DadosLai {
   };
   registros?: Record<string, unknown>[];
   principais_areas?: Record<string, Record<string, string>>;
+  top_responsaveis?: ResponsavelStats[];
 }
 
 /** Alias para retrocompatibilidade */
@@ -111,5 +120,6 @@ export interface DadosPainelOuvidoria {
   relatorio_mensal_disponivel?: boolean;
   relatorio_mensal_url?: string;
   registros?: RegistroOuvidoria[];
+  top_responsaveis?: ResponsavelStats[];
 }
 

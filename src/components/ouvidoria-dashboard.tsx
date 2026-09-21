@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import type { DadosPainelOuvidoria } from "@/types/dados";
 import { OuvidoriaKpis } from "./ouvidoria-kpis";
 import { OuvidoriaCharts } from "./ouvidoria-charts";
-import { OuvidoriaAlerts } from "./ouvidoria-alerts";
-import { SlaSection } from "./sla-section";
 import { DateFilterBar } from "./date-filter-bar";
 import { useDateFilterOuvidoria } from "@/lib/use-date-filter";
 import { NupTable } from "./nup-table";
@@ -132,11 +130,6 @@ function OuvidoriaDashboardContent({
         )}
       </section>
 
-      {/* Alertas Inteligentes (RECURSO NOVO) */}
-      <section id="secao-alertas">
-        <OuvidoriaAlerts alertas={filteredData.alertas} />
-      </section>
-
       {/* Evolução Mensal */}
       <section id="secao-mensal">
         <OuvidoriaCharts
@@ -172,13 +165,6 @@ function OuvidoriaDashboardContent({
           dados={filteredData}
         />
       </section>
-
-      {/* SLA e Performance */}
-      <section id="secao-sla">
-        <SlaSection dados={filteredData as any} />
-      </section>
-
-
 
       {/* Footer */}
       <footer className="text-center text-xs text-muted-foreground py-6 border-t border-border">

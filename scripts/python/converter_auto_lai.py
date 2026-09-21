@@ -398,13 +398,19 @@ def processar_dados(registros):
     dados["registros"] = []
     for r in registros:
         registro_limpo = {}
+        area_valor = None
         for chave, valor in r.items():
             chave_lower = str(chave).lower() if chave else ""
-            if any(termo in chave_lower for termo in ["usuário", "usuario", "responsável", "responsavel"]):
+            if any(termo in chave_lower for termo in ["usuário", "usuario"]):
+                continue
+            if any(termo in chave_lower for termo in ["responsável", "responsavel"]):
+                area_valor = valor
                 continue
             if isinstance(valor, datetime):
                 valor = valor.strftime("%Y-%m-%d")
             registro_limpo[chave] = valor
+        area_str = str(area_valor).strip() if area_valor not in (None, "None", "") else ""
+        registro_limpo["area"] = area_str if area_str else "Não Identificada"
         dados["registros"].append(registro_limpo)
 
     return dados

@@ -1,20 +1,21 @@
 import type { DadosOuvidoria } from "@/types/dados";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { 
-  BarChart, Bar, 
+import {
+  BarChart, Bar,
   ComposedChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Legend, LabelList, Cell, PieChart, Pie
+  LabelList, Cell, PieChart, Pie
 } from "recharts";
 import {
   TrendingUp, PieChart as PieIcon, BarChart3, FileText, MessageSquare,
   Users, Building,
 } from "lucide-react";
 import { CHART_COLORS, getColor } from "@/lib/chart-colors";
-import { formatMesLabel } from "@/lib/use-date-filter";
 import { useEffect, useRef } from "react";
 import { BrazilMapCard } from "./brazil-map";
 import { TempoRespostaChart } from "./tempo-resposta-chart";
+import { EvolucaoMensalChart } from "./evolucao-mensal-chart";
+import { TopResponsaveisTable } from "./top-responsaveis-table";
 
 interface ChartCardsProps {
   section: "mensal" | "situacao" | "formulario" | "perfil";
@@ -244,7 +245,11 @@ export function ChartCards({ section, title, dados }: ChartCardsProps) {
       {section === "mensal" && (
         <div className="space-y-4">
           {dados.historico_anual && <HistoricoAnualChart dados={dados} />}
-          <MensalChart dados={dados} />
+          <EvolucaoMensalChart
+            meses={dados.mensal.meses}
+            quantidades={dados.mensal.quantidades}
+            title="Evolução Mensal de Pedidos"
+          />
           <TempoRespostaChart meses={dados.mensal.meses} mediaDias={dados.mensal.media_dias_resposta} />
         </div>
       )}
@@ -349,8 +354,8 @@ function HistoricoAnualChart({ dados }: { dados: DadosOuvidoria }) {
                 </Bar>
                 <Line yAxisId="left" type="linear" dataKey="tempoNorm" name="Tempo Médio (dias)"
                   stroke="var(--color-foreground)" strokeWidth={2.5}
-                  dot={{ r: 4, fill: "var(--color-foreground)", stroke: "var(--color-card)", strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: "var(--color-foreground)" }}
+                  dot={{ r: 8, fill: "var(--color-foreground)", stroke: "var(--color-card)", strokeWidth: 2 }}
+                  activeDot={{ r: 10, fill: "var(--color-foreground)" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -402,51 +407,6 @@ function HistoricoAnualChart({ dados }: { dados: DadosOuvidoria }) {
   );
 }
 
-function MensalChart({ dados }: { dados: DadosOuvidoria }) {
-  const chartData = dados.mensal.meses.map((m, i) => ({
-    mes: formatMesLabel(m),
-    quantidade: dados.mensal.quantidades[i],
-    tempoMedio: dados.mensal.media_dias_resposta[i],
-  }));
-
-  return (
-    <Card className="border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          Manifestacoes por Mês - Tempo Medio de Resposta
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={340}>
-          <ComposedChart data={chartData} margin={{ top: 24, right: 30, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis dataKey="mes" tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }} tickLine={false} axisLine={false} />
-            <YAxis yAxisId="left" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} tickLine={false} axisLine={false} />
-            <YAxis yAxisId="right" orientation="right" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} tickLine={false} axisLine={false} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              iconType="circle"
-              iconSize={8}
-              formatter={(value: string) => (
-                <span className="text-xs text-muted-foreground">{value}</span>
-              )}
-            />
-            <Bar yAxisId="left" dataKey="quantidade" name="Manifestacoes" fill="#3ab3a5fa" radius={[4, 4, 0, 0]} maxBarSize={50} opacity={0.9}>
-              <LabelList
-                dataKey="quantidade"
-                position="top"
-                style={{ fill: "var(--color-foreground)", fontSize: 11, fontWeight: 700 }}
-              />
-            </Bar>
-            <Line yAxisId="right" type="linear" dataKey="tempoMedio" name="Tempo Medio (dias)" stroke="#a7a7a7ff" strokeWidth={3} dot={{ r: 5, fill: "#04224eff", stroke: "#fff", strokeWidth: 2 }} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  );
-}
-
 function SituacaoCharts({ dados }: { dados: DadosOuvidoria }) {
   const allowedSituations = ["Concluída", "Cadastrada", "Encaminhada para outro órgão"];
   const situacoesFiltradas = Object.fromEntries(
@@ -457,21 +417,24 @@ function SituacaoCharts({ dados }: { dados: DadosOuvidoria }) {
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <DonutChart
-        data={situacoesFiltradas}
-        title="Distribuicao por Situacao"
-        icon={PieIcon}
-        topAreas={dados.principais_areas?.situacoes}
-        colors={["#7e597fff", "#06b6d4", "#e77409ff", "#4ade80"]}
-      />
-      <HorizontalBarChart
-        data={dados.decisoes}
-        title="Especificacao da Decisao"
-        icon={BarChart3}
-        color="#8b5cf6"
-        topAreas={dados.principais_areas?.decisoes}
-      />
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <DonutChart
+          data={situacoesFiltradas}
+          title="Distribuicao por Situacao"
+          icon={PieIcon}
+          topAreas={dados.principais_areas?.situacoes}
+          colors={["#7e597fff", "#06b6d4", "#e77409ff", "#4ade80"]}
+        />
+        <HorizontalBarChart
+          data={dados.decisoes}
+          title="Especificacao da Decisao"
+          icon={BarChart3}
+          color="#8b5cf6"
+          topAreas={dados.principais_areas?.decisoes}
+        />
+      </div>
+      <TopResponsaveisTable dados={dados.top_responsaveis || []} />
     </div>
   );
 }

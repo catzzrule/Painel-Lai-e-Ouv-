@@ -1,6 +1,6 @@
 
 import { useState, useMemo, useCallback } from "react";
-import type { DadosPainelOuvidoria, DadosLai, KPIs, DadosMensais } from "@/types/dados";
+import type { DadosPainelOuvidoria, DadosLai, KPIs, DadosMensais, RegistroOuvidoria, ResponsavelStats } from "@/types/dados";
 import type { DateRange } from "react-day-picker";
 
 export type PainelType = "lai" | "ouvidoria";
@@ -65,7 +65,9 @@ export function useDateFilterOuvidoria(dados: DadosPainelOuvidoria): DateFilterR
   }, []);
 
   const filteredData = useMemo<DadosPainelOuvidoria>(() => {
-    if (!hasActiveFilter) return dados;
+    if (!hasActiveFilter) {
+      return { ...dados, top_responsaveis: computeTopResponsaveis(dados.registros || []) };
+    }
 
     const registros = (dados.registros || []).filter((r) =>
       matchesOuvidoriaFilters(r, selectedYear, dateRange, selectedTags)
@@ -228,6 +230,7 @@ export function useDateFilterOuvidoria(dados: DadosPainelOuvidoria): DateFilterR
       mensal,
       alertas: dados.alertas,
       registros,
+      top_responsaveis: computeTopResponsaveis(registros),
     };
   }, [dados, dateRange, selectedTags, selectedYear, hasActiveFilter]);
 
@@ -408,6 +411,7 @@ export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
       estados: sortDesc(estados),
       mensal,
       registros,
+      top_responsaveis: computeTopResponsaveisLai(registros),
     };
   }, [dados, dateRange, selectedYear, hasActiveFilter]);
 
@@ -439,6 +443,75 @@ export function useDateFilterLai(dados: DadosLai): DateFilterReturn<DadosLai> {
 }
 
 // ─── Utilitários ─────────────────────────────────────────
+
+const AREA_PLACEHOLDERS = new Set(["", "Não Informado", "Não Identificada", "None"]);
+
+function isConcluida(situacao: string | undefined): boolean {
+  const s = (situacao || "").toLowerCase();
+  return s.includes("conclu") || s.includes("resolv") || s.includes("arquiv");
+}
+
+function getFieldBySubstring(r: Record<string, unknown>, substring: string): string | undefined {
+  for (const [k, v] of Object.entries(r)) {
+    if (k && k.includes(substring) && v != null) return String(v);
+  }
+  return undefined;
+}
+
+/** Agrega total, taxa de conclusão e dias médios de resposta por área/responsável. */
+function aggregateResponsaveis<T>(
+  items: T[],
+  extract: (item: T) => { area: string | undefined; concluida: boolean; dias: number | null }
+): ResponsavelStats[] {
+  const stats: Record<string, { total: number; concluidas: number; diasTotal: number; diasCount: number }> = {};
+
+  for (const item of items) {
+    const { area, concluida, dias } = extract(item);
+    if (!area || AREA_PLACEHOLDERS.has(area)) continue;
+
+    if (!stats[area]) stats[area] = { total: 0, concluidas: 0, diasTotal: 0, diasCount: 0 };
+    const s = stats[area];
+    s.total += 1;
+    if (concluida) s.concluidas += 1;
+    if (dias !== null && dias >= 0) {
+      s.diasTotal += dias;
+      s.diasCount += 1;
+    }
+  }
+
+  return Object.entries(stats)
+    .map(([nome, s]) => ({
+      nome,
+      total: s.total,
+      taxaConclusao: s.total > 0 ? Math.round((s.concluidas / s.total) * 1000) / 10 : 0,
+      diasMedio: s.diasCount > 0 ? Math.round((s.diasTotal / s.diasCount) * 10) / 10 : 0,
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 10);
+}
+
+function computeTopResponsaveis(registros: RegistroOuvidoria[]): ResponsavelStats[] {
+  return aggregateResponsaveis(registros, (r) => ({
+    area: r.area,
+    concluida: isConcluida(r.situacao),
+    dias: r.dt_abertura && r.dt_resposta ? daysDiff(r.dt_abertura, r.dt_resposta) : null,
+  }));
+}
+
+/** Mesmo cálculo para os registros do LAI, cujas chaves vêm direto da planilha (ex.: "Situação", "Data de Cadastro"). */
+function computeTopResponsaveisLai(registros: Record<string, unknown>[]): ResponsavelStats[] {
+  return aggregateResponsaveis(registros, (r) => {
+    const area = r["area"] as string | undefined;
+    const sit = getFieldBySubstring(r, "Situa");
+    const dtAbertura = getFieldBySubstring(r, "Data de Cadastro");
+    const dtResposta = getFieldBySubstring(r, "Data de Resposta");
+    return {
+      area,
+      concluida: isConcluida(sit),
+      dias: dtAbertura && dtResposta ? daysDiff(dtAbertura, dtResposta) : null,
+    };
+  });
+}
 
 function daysDiff(a: string, b: string): number {
   const da = new Date(a);
